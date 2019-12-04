@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:cache="http://www.springframework.org/schema/cache"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-4.3.xsd
+		http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache-4.3.xsd
+		http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
+		http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.3.xsd">
+	
+	<!-- Root Context: defines shared resources visible to all other web components -->
+<!-- DB연동에 필요한 환경설정 값 -->
+    <util:properties id="dbConfig">
+        <!-- 데이터베이스 호스트 이름 -->
+        <prop key="dbHost">localhost</prop>
+        <!-- 데이터베이스 포트번호 -->
+        <prop key="dbPort">3306</prop>
+        <!-- 데이터베이스 이름 -->
+        <prop key="dbName">lotte_ex</prop>
+        <!-- 데이터베이스 문자셋 -->
+        <prop key="dbCharset">utf8</prop>
+        <!-- 데이터베이스 계정명 -->
+        <prop key="dbUsername">root</prop>
+        <!-- 데이터베이스 비밀번호 -->
+        <prop key="dbPassword">1234</prop>
+        <!-- Mapper 파일들이 위치할 '/src/main/resources' 하위의 경로  -->
+        <prop key="mapperPath">/mappers/**/*sql.xml</prop>
+    </util:properties>
+
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="net.sf.log4jdbc.sql.jdbcapi.DriverSpy" />
+        <property name="url" value="jdbc:log4jdbc:mysql://#{dbConfig['dbHost']}:#{dbConfig['dbPort']}/#{dbConfig['dbName']}?characterEncoding=#{dbConfig['dbCharset']}&amp;serverTimezone=UTC" />
+        <property name="username" value="#{dbConfig['dbUsername']}" />
+        <property name="password" value="#{dbConfig['dbPassword']}" />
+    </bean>
+
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+        <property name="mapperLocations" value="classpath:#{dbConfig['mapperPath']}" />
+    </bean>
+
+    <bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate" destroy-method="clearCache">
+        <constructor-arg name="sqlSessionFactory" ref="sqlSessionFactory" />
+    </bean>
+
+</beans>
